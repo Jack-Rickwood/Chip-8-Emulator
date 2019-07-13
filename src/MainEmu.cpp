@@ -5,7 +5,8 @@
 #include <fstream>
 #include <cstring>
 #include <cstddef>
-#include <process.h>
+//#include <process.h>
+#include "SDL.h"
 #include <ctype.h>
 #include <stdio.h>
 #include "MainEmu.h"
@@ -43,6 +44,7 @@ int main(int argc, char **argv) {
 	// Load Rom
 	if (argc == 1) {
 		cout << "An error occured! Rom couldn't be found. Did you provide one?" << endl;
+                exit(1);
 	}
 	else if (argc >= 2) {
 		cout << "Loading the last rom provided..." << endl;
@@ -61,7 +63,6 @@ int main(int argc, char **argv) {
 	}
 
 	// End
-	system("pause>nul");
 	return 0;
 }
 
