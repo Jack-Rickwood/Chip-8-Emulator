@@ -6,6 +6,7 @@
 #include <cstring>
 #include <cstddef>
 //#include <process.h>
+#include "SDL.h"
 #include <ctype.h>
 #include <stdio.h>
 #include "MainEmu.h"
