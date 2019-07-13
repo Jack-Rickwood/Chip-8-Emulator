@@ -8,7 +8,6 @@
 #include <process.h>
 #include <ctype.h>
 #include <stdio.h>
-// #include <SDL.h>
 #include "MainEmu.h"
 
 using namespace std;
@@ -34,8 +33,7 @@ unsigned char chip8_fontset[80] =
 };
 
 int main(int argc, char **argv) {
-	// SDL_Window* window = NULL;
-	// int SDL_Init(SDL_INIT_EVERYTHING);
+	// Setup Graphics Here
 	// Setup Input Here
 
 	// Initialize System
