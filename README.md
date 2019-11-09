@@ -1,4 +1,5 @@
 # CHIP-8-Emulator
+![alt-text](https://github.com/Jack-Rickwood/Chip-8-Emulator/blob/master/images/Pong.png "Pong")
 My attempt at writing a CHIP-8 emulator in c++
 
 ## Compiling and Running
