@@ -1,3 +1,5 @@
+#include "SDL.h"
+#include "SDL_opengl.h"
 #pragma once
 
 class Chip8 {
@@ -15,11 +17,16 @@ private:
 	unsigned char sound_timer;
 	unsigned short stack[16];
 	unsigned short sp;
-	unsigned char key[16];
+	SDL_Window *GraphicsWindow;
+	SDL_Renderer *GraphicsRenderer;
+	SDL_Texture *Texture;
 public:
+	void InitializeGraphics();
 	void InitializeSystem();
 	void LoadRom(std::string filepath);
 	void EmulateCycle();
 	void DrawGraphics();
+	void PrintState();
 	bool DrawFlag;
+	unsigned char key[16];
 };
