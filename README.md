@@ -9,21 +9,17 @@ My attempt at writing a CHIP-8 emulator in c++
 - Make sure you have the SDL2 development library downloaded. Put the 64 bit lib files into `./lib` and the .h files into `./include`.
 - Make sure SDL2.dll is in the directory with your exe when you run it.
 - Right now for debug purposes the program will not continue immediately and will wait for user input to continue (q will quit, p will print some info, and enter will continue). To disable this, simply comment these lines in the graphics opcode:
-	`string response;
-
+	```
+	string response;
 	getline(cin, response);
 
 	if (response.compare("p") == 0) {
-
 		EmulatedSystem.PrintState();
-
 	}
-
 	else if (response.compare("q") == 0) {
-
 		exit(0);
-
-	}`
+	}
+	```
 
 Will add more detailed instructions later.
 
