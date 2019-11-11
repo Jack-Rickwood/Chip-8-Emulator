@@ -17,6 +17,7 @@ private:
 	unsigned char sound_timer;
 	unsigned short stack[16];
 	unsigned short sp;
+	bool key_pressed;
 	SDL_Window *GraphicsWindow;
 	SDL_Renderer *GraphicsRenderer;
 	SDL_Texture *Texture;

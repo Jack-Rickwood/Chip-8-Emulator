@@ -293,13 +293,13 @@ void Chip8::EmulateCycle() {
 
 			case 0x0005:
 				printf("Opcode 0x%X called.\n", opcode);
-				V[(opcode & 0x0F00) >> 8] -= V[(opcode & 0x00F0) >> 4];
 				if (V[(opcode & 0x00F0) >> 4] > V[(opcode & 0x0F00) >> 8]) {
 					V[0xF] = 0;
 				}
 				else {
 					V[0xF] = 1;
 				}
+				V[(opcode & 0x0F00) >> 8] -= V[(opcode & 0x00F0) >> 4];
 				pc += 2;
 			break;
 
@@ -386,6 +386,7 @@ void Chip8::EmulateCycle() {
 				}
 			}
 		}
+		/*
 		string response;
 		getline(cin, response);
 		if (response.compare("p") == 0) {
@@ -394,6 +395,7 @@ void Chip8::EmulateCycle() {
 		else if (response.compare("q") == 0) {
 			exit(0);
 		}
+		*/
 
 		DrawFlag = true;
 		pc += 2;
@@ -404,7 +406,7 @@ void Chip8::EmulateCycle() {
 		switch (opcode & 0x00FF) {
 			case 0x009E:
 				printf("Opcode 0x%X called.\n", opcode);
-				if (key[V[(opcode & 0x0F00) >> 8]] != 0)
+				if (EmulatedSystem.key[V[(opcode & 0x0F00) >> 8]] != 0)
 					pc += 4;
 				else
 					pc += 2;
@@ -412,7 +414,7 @@ void Chip8::EmulateCycle() {
 
 			case 0x00A1:
 				printf("Opcode 0x%X called.\n", opcode);
-				if (key[V[(opcode & 0x0F00) >> 8]] == 0)
+				if (EmulatedSystem.key[V[(opcode & 0x0F00) >> 8]] == 0)
 					pc += 4;
 				else
 					pc += 2;
@@ -437,6 +439,16 @@ void Chip8::EmulateCycle() {
 			case 0x000A:
 				printf("Opcode 0x%X called.\n", opcode);
 				// LAST OPCODE TO IMPLEMENT (FOR INPUT)
+				key_pressed = false;
+				for (int i = 0; i < 16; i++) {
+					if (EmulatedSystem.key[i] != 1) {
+						V[(opcode & 0x0F00) >> 8] = i;
+						key_pressed = true;
+					}
+				}
+				if (!key_pressed) {
+					return;
+				}
 				pc += 2;
 			break;
 
@@ -514,6 +526,8 @@ void Chip8::EmulateCycle() {
 			// Sound here
 		--sound_timer;
 	}
+
+	// printf("%i %X %X\n", pc, V[6], V[7]);
 }
 
 void Chip8::DrawGraphics() {
