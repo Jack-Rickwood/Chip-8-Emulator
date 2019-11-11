@@ -90,12 +90,17 @@ int main(int argc, char **argv) {
 					exit(0);
 				for (int i = 0; i < 16; ++i) {
 					if (e.key.keysym.sym == keymap[i]) {
-						EmulatedSystem.key[i] = 0;
+						EmulatedSystem.key[i] = 1;
+						cout << EmulatedSystem.key[i] << "\n";
 					}
 				}
 			}
 			if (e.type == SDL_KEYUP) {
-
+				for (int i = 0; i < 16; ++i) {
+					if (e.key.keysym.sym == keymap[i]) {
+						EmulatedSystem.key[i] = 0;
+					}
+				}
 			}
 		}
 
@@ -406,7 +411,7 @@ void Chip8::EmulateCycle() {
 		switch (opcode & 0x00FF) {
 			case 0x009E:
 				printf("Opcode 0x%X called.\n", opcode);
-				if (EmulatedSystem.key[V[(opcode & 0x0F00) >> 8]] != 0)
+				if (key[V[(opcode & 0x0F00) >> 8]] != 0)
 					pc += 4;
 				else
 					pc += 2;
@@ -414,7 +419,7 @@ void Chip8::EmulateCycle() {
 
 			case 0x00A1:
 				printf("Opcode 0x%X called.\n", opcode);
-				if (EmulatedSystem.key[V[(opcode & 0x0F00) >> 8]] == 0)
+				if (key[V[(opcode & 0x0F00) >> 8]] == 0)
 					pc += 4;
 				else
 					pc += 2;
@@ -441,7 +446,7 @@ void Chip8::EmulateCycle() {
 				// LAST OPCODE TO IMPLEMENT (FOR INPUT)
 				key_pressed = false;
 				for (int i = 0; i < 16; i++) {
-					if (EmulatedSystem.key[i] != 1) {
+					if (key[i] != 1) {
 						V[(opcode & 0x0F00) >> 8] = i;
 						key_pressed = true;
 					}
