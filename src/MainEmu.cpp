@@ -17,6 +17,7 @@
 
 using namespace std;
 Chip8 EmulatedSystem;
+bool debug;
 unsigned char chip8_fontset[80] =
 {
   0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
@@ -69,10 +70,27 @@ int main(int argc, char **argv) {
 	// Load Rom
 	if (argc == 1) {
 		cout << "An error occured! Rom couldn't be found. Did you provide one?" << endl;
+		exit(0);
 	}
-	else if (argc >= 2) {
-		cout << "Loading the last rom provided..." << endl;
+	else if (argc == 2) {
+		cout << "Loading the provided rom..." << endl;
 		EmulatedSystem.LoadRom(argv[argc - 1]);
+	}
+	else if (argc == 3) {
+		string debugarg = argv[argc - 1];
+		if (debugarg == "--debug") {
+			debug = true;
+			cout << "Loading the provided rom in debug mode..." << endl;
+			EmulatedSystem.LoadRom(argv[argc - 2]);
+		}
+		else {
+			cout << "An error occured! Usage is <path-to-rom> [--debug]" << endl;
+			exit(0);
+		}
+	}
+	else {
+		cout << "An error occured! Usage is <path-to-rom> [--debug]" << endl;
+		exit(0);
 	}
 
 	SDL_Event e;
@@ -91,7 +109,6 @@ int main(int argc, char **argv) {
 				for (int i = 0; i < 16; ++i) {
 					if (e.key.keysym.sym == keymap[i]) {
 						EmulatedSystem.key[i] = 1;
-						cout << EmulatedSystem.key[i] << "\n";
 					}
 				}
 			}
@@ -149,6 +166,7 @@ void Chip8::InitializeSystem() {
 	}
 	delay_timer = 0;
 	sound_timer = 0;
+	debug = false;
 	cout << "System initialized successfully!" << endl;
 }
 
@@ -182,7 +200,6 @@ void Chip8::EmulateCycle() {
 	case 0x0000:
 		switch (opcode & 0x000F) {
 			case 0x0000:
-				printf("Opcode 0x%X called.\n", opcode);
 				for (int i = 0; i < 2048; ++i) {
 					gfx[i] = 0;
 				}
@@ -191,7 +208,6 @@ void Chip8::EmulateCycle() {
 			break;
 
 			case 0x000E:
-				printf("Opcode 0x%X called.\n", opcode);
 				--sp;
 				pc = stack[sp];
 				pc += 2;
@@ -207,19 +223,16 @@ void Chip8::EmulateCycle() {
 	break;
 
 	case 0x1000:
-		printf("Opcode 0x%X called.\n", opcode);
 		pc = opcode & 0x0FFF;
 	break;
 
 	case 0x2000:
-		printf("Opcode 0x%X called.\n", opcode);
 		stack[sp] = pc;
 		++sp;
 		pc = opcode & 0x0FFF;
 	break;
 
 	case 0x3000:
-		printf("Opcode 0x%X called.\n", opcode);
 		if (V[(opcode & 0x0F00) >> 8] == (opcode & 0x00FF)) {
 			pc += 4;
 		}
@@ -229,7 +242,6 @@ void Chip8::EmulateCycle() {
 	break;
 
 	case 0x4000:
-		printf("Opcode 0x%X called.\n", opcode);
 		if (V[(opcode & 0x0F00) >> 8] != (opcode & 0x00FF)) {
 			pc += 4;
 		}
@@ -239,7 +251,6 @@ void Chip8::EmulateCycle() {
 	break;
 
 	case 0x5000:
-		printf("Opcode 0x%X called.\n", opcode);
 		if (V[(opcode & 0x0F00) >> 8] == V[(opcode & 0x00F0) >> 4]) {
 			pc += 4;
 		}
@@ -249,13 +260,11 @@ void Chip8::EmulateCycle() {
 	break;
 
 	case 0x6000:
-		printf("Opcode 0x%X called.\n", opcode);
 		V[(opcode & 0x0F00) >> 8] = opcode & 0x00FF;
 		pc += 2;
 	break;
 
 	case 0x7000:
-		printf("Opcode 0x%X called.\n", opcode);
 		V[(opcode & 0x0F00) >> 8] += opcode & 0x00FF;
 		pc += 2;
 	break;
@@ -263,31 +272,26 @@ void Chip8::EmulateCycle() {
 	case 0x8000:
 		switch (opcode & 0x000F) {
 			case 0x0000:
-				printf("Opcode 0x%X called.\n", opcode);
 				V[(opcode & 0x0F00) >> 8] = V[(opcode & 0x00F0) >> 4];
 				pc += 2;
 			break;
 
 			case 0x0001:
-				printf("Opcode 0x%X called.\n", opcode);
 				V[(opcode & 0x0F00) >> 8] |= V[(opcode & 0x00F0) >> 4];
 				pc += 2;
 			break;
 
 			case 0x0002:
-				printf("Opcode 0x%X called.\n", opcode);
 				V[(opcode & 0x0F00) >> 8] &= V[(opcode & 0x00F0) >> 4];
 				pc += 2;
 			break;
 
 			case 0x0003:
-				printf("Opcode 0x%X called.\n", opcode);
 				V[(opcode & 0x0F00) >> 8] ^= V[(opcode & 0x00F0) >> 4];
 				pc += 2;
 			break;
 
 			case 0x0004:
-				printf("Opcode 0x%X called.\n", opcode);
 				V[(opcode & 0x0F00) >> 8] += V[(opcode & 0x00F0) >> 4];
 				if (V[(opcode & 0x00F0) >> 4] > (0xFF - V[(opcode & 0x0F00) >> 8]))
 					V[0xF] = 1;
@@ -297,7 +301,6 @@ void Chip8::EmulateCycle() {
 			break;
 
 			case 0x0005:
-				printf("Opcode 0x%X called.\n", opcode);
 				if (V[(opcode & 0x00F0) >> 4] > V[(opcode & 0x0F00) >> 8]) {
 					V[0xF] = 0;
 				}
@@ -309,14 +312,12 @@ void Chip8::EmulateCycle() {
 			break;
 
 			case 0x0006:
-				printf("Opcode 0x%X called.\n", opcode);
 				V[0xF] = V[(opcode & 0x0F00) >> 8] & 0x1;
 				V[(opcode & 0x0F00) >> 8] >>= 1;
 				pc += 2;
 			break;
 
 			case 0x0007:
-				printf("Opcode 0x%X called.\n", opcode);
 				if (V[(opcode & 0x0F00) >> 8] > V[(opcode & 0x00F0) >> 4])
 					V[0xF] = 0;
 				else
@@ -326,7 +327,6 @@ void Chip8::EmulateCycle() {
 			break;
 
 			case 0x000E:
-				printf("Opcode 0x%X called.\n", opcode);
 				V[0xF] = V[(opcode & 0x0F00) >> 8] >> 7;
 				V[(opcode & 0x0F00) >> 8] <<= 1;
 				pc += 2;
@@ -341,7 +341,6 @@ void Chip8::EmulateCycle() {
 	break;
 
 	case 0x9000:
-		printf("Opcode 0x%X called.\n", opcode);
 		if (V[(opcode & 0x0F00) >> 8] != V[(opcode & 0x00F0) >> 4]) {
 			pc += 4;
 		}
@@ -351,18 +350,15 @@ void Chip8::EmulateCycle() {
 	break;
 
 	case 0xA000:
-		printf("Opcode 0x%X called.\n", opcode);
 		I = opcode & 0x0FFF;
 		pc += 2;
 	break;
 
 	case 0xB000:
-		printf("Opcode 0x%X called.\n", opcode);
 		pc = (opcode & 0x0FFF) + V[0];
 	break;
 
 	case 0xC000:
-		printf("Opcode 0x%X called.\n", opcode);
 		V[(opcode & 0x0F00) >> 8] = (opcode & 0x00FF) & (rand() % (0xFF + 1));
 		pc += 2;
 	break;
@@ -372,36 +368,29 @@ void Chip8::EmulateCycle() {
 		unsigned short y = V[(opcode & 0x00F0) >> 4];
 		unsigned short height = opcode & 0x000F;
 		unsigned short pixel;
-		printf("Opcode 0x%X called. ", opcode);
-		printf("x=%d ", V[(opcode & 0x0F00) >> 8]);
-		printf("y=%d ", V[(opcode & 0x00F0) >> 4]);
-		printf("height=%d\n", opcode & 0x000F);
+		if (debug == true) {
+			printf("Opcode 0x%X called. ", opcode);
+			printf("x=%d ", V[(opcode & 0x0F00) >> 8]);
+			printf("y=%d ", V[(opcode & 0x00F0) >> 4]);
+			printf("height=%d\n", opcode & 0x000F);
+		}
 
 		V[0xF] = 0;
 		for (int yline = 0; yline < height; yline++) {
 			pixel = memory[I + yline];
 			for (int xline = 0; xline < 8; xline++) {
 				if ((pixel & (0x80 >> xline)) != 0 && (x + xline + ((y + yline) * 64)) <= 2048) {
-					if (gfx[(x + xline + ((y + yline) * 64)) % (64 * 32)] == 1) {
-						// cout << "COLLISION!" << endl;
+					x %= 64;
+					y %= 32;
+					if (gfx[(x + xline + ((y + yline) * 64))] == 1) {
 						V[0xF] = 1;
 					}
-						
-					gfx[(x + xline + ((y + yline) * 64)) % (64 * 32)] ^= 1;
+					if ((y + yline < 32) && (x + xline < 64)) {
+						gfx[(x + xline + ((y + yline) * 64))] ^= 1;
+					}
 				}
 			}
 		}
-		/*
-		string response;
-		getline(cin, response);
-		if (response.compare("p") == 0) {
-			EmulatedSystem.PrintState();
-		}
-		else if (response.compare("q") == 0) {
-			exit(0);
-		}
-		*/
-
 		DrawFlag = true;
 		pc += 2;
 		break;
@@ -410,7 +399,6 @@ void Chip8::EmulateCycle() {
 	case 0xE000:
 		switch (opcode & 0x00FF) {
 			case 0x009E:
-				printf("Opcode 0x%X called.\n", opcode);
 				if (key[V[(opcode & 0x0F00) >> 8]] != 0)
 					pc += 4;
 				else
@@ -418,7 +406,6 @@ void Chip8::EmulateCycle() {
 			break;
 
 			case 0x00A1:
-				printf("Opcode 0x%X called.\n", opcode);
 				if (key[V[(opcode & 0x0F00) >> 8]] == 0)
 					pc += 4;
 				else
@@ -436,14 +423,11 @@ void Chip8::EmulateCycle() {
 	case 0xF000:
 		switch (opcode & 0x00FF) {
 			case 0x0007:
-				printf("Opcode 0x%X called.\n", opcode);
 				V[(opcode & 0x0F00) >> 8] = delay_timer;
 				pc += 2;
 			break;
 
 			case 0x000A:
-				printf("Opcode 0x%X called.\n", opcode);
-				// LAST OPCODE TO IMPLEMENT (FOR INPUT)
 				key_pressed = false;
 				for (int i = 0; i < 16; i++) {
 					if (key[i] != 1) {
@@ -458,19 +442,16 @@ void Chip8::EmulateCycle() {
 			break;
 
 			case 0x0015:
-				printf("Opcode 0x%X called.\n", opcode);
 				delay_timer = V[(opcode & 0x0F00) >> 8];
 				pc += 2;
 			break;
 
 			case 0x0018:
-				printf("Opcode 0x%X called.\n", opcode);
 				sound_timer = V[(opcode & 0x0F00) >> 8];
 				pc += 2;
 			break;
 
 			case 0x001E:
-				printf("Opcode 0x%X called.\n", opcode);
 				if (I + V[(opcode & 0x0F00) >> 8] > 0xFFF)
 					V[0xF] = 1;
 				else
@@ -480,13 +461,11 @@ void Chip8::EmulateCycle() {
 			break;
 
 			case 0x0029:
-				printf("Opcode 0x%X called.\n", opcode);
 				I = V[(opcode & 0x0F00) >> 8] * 0x5;
 				pc += 2;
 			break;
 
 			case 0x0033:
-				printf("Opcode 0x%X called.\n", opcode);
 				memory[I] = V[(opcode & 0x0F00) >> 8] / 100;
 				memory[I + 1] = (V[(opcode & 0x0F00) >> 8] / 10) % 10;
 				memory[I + 2] = (V[(opcode & 0x0F00) >> 8] % 100) % 10;
@@ -494,7 +473,6 @@ void Chip8::EmulateCycle() {
 			break;
 
 			case 0x0055:
-				printf("Opcode 0x%X called.\n", opcode);
 				for (int i = 0; i <= ((opcode & 0x0F00) >> 8); ++i)
 					memory[I + i] = V[i];
 				I += ((opcode & 0x0F00) >> 8) + 1;
@@ -502,7 +480,6 @@ void Chip8::EmulateCycle() {
 			break;
 
 			case 0x0065:
-				printf("Opcode 0x%X called.\n", opcode);
 				for (int i = 0; i <= ((opcode & 0x0F00) >> 8); ++i)
 					V[i] = memory[I + i];
 				I += ((opcode & 0x0F00) >> 8) + 1;
@@ -531,8 +508,18 @@ void Chip8::EmulateCycle() {
 			// Sound here
 		--sound_timer;
 	}
-
-	// printf("%i %X %X\n", pc, V[6], V[7]);
+	
+	if (debug == true) {
+		printf("Opcode 0x%X called.\n", opcode);
+		string response;
+		getline(cin, response);
+		if (response.compare("p") == 0) {
+			EmulatedSystem.PrintState();
+		}
+		else if (response.compare("q") == 0) {
+			exit(0);
+		}
+	}
 }
 
 void Chip8::DrawGraphics() {
